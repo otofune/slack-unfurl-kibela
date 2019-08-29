@@ -8,7 +8,6 @@ git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
 
 gem "sinatra", "~> 2.0"
 
-
 gem "guard", "~> 2.15"
 
 gem "guard-rack", "~> 2.2"
