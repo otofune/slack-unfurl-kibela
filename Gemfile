@@ -15,3 +15,5 @@ gem "guard-rack", "~> 2.2"
 gem "graphql-client", "~> 0.15.0"
 
 gem "pry-byebug", "~> 3.7"
+
+gem "irb", "~> 1.0"
