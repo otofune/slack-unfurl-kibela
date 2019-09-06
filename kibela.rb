@@ -3,14 +3,12 @@
 require 'graphql/client'
 require 'graphql/client/http'
 require 'json'
-
-KIBELA_TEAM_NAME = ENV["SYAKUSI_KIBELA_TEAM_NAME"]
-KIBELA_ACCESS_TOKEN = ENV["SYAKUSI_KIBELA_ACCESS_TOKEN"]
+require_relative 'config'
 
 class KibelaClient
-    HTTP = GraphQL::Client::HTTP.new("https://#{KIBELA_TEAM_NAME}.kibe.la/api/v1") do
+    HTTP = GraphQL::Client::HTTP.new("https://#{Config::KIBELA_TEAM_NAME}.kibe.la/api/v1") do
         def headers(context)
-            { "Authorization": "Bearer #{KIBELA_ACCESS_TOKEN}",
+            { "Authorization": "Bearer #{Config::KIBELA_ACCESS_TOKEN}",
               "Accept": "application/json" }
         end
     end
@@ -37,7 +35,7 @@ class KibelaClient
     }
     GRAPHQL
 
-    def get_note path
+    def self.get_note path
         Client.query(NoteQuery, variables: { path: path })&.data&.note
     end
 end

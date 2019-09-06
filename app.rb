@@ -7,17 +7,10 @@ require 'uri'
 require 'time'
 require 'json'
 
+require_relative 'config'
 require_relative 'kibela'
 
 class SyakusiApp < Sinatra::Base
-    SLACK_TOKEN = ENV['SYAKUSI_SLACK_BOT_USER_TOKEN']
-    SLACK_UNFURL_API = URI.parse('https://slack.com/api/chat.unfurl')
-
-    def initialize
-        super
-        @kibela_client = KibelaClient.new
-    end
-
     post '/' do
         params = JSON.parse request.body.read
 
@@ -41,7 +34,7 @@ class SyakusiApp < Sinatra::Base
                 url = URI.parse link['url']
                 next unless url.path.start_with?("/notes/") || url.path.start_with?("/@")
 
-                note = @kibela_client.get_note(url.path)
+                note = KibelaClient.get_note(url.path)
                 attachment = {
                     author_icon: note.author.avatar_image.url,
                     author_link: note.author.url,
@@ -56,12 +49,12 @@ class SyakusiApp < Sinatra::Base
                 unfurls[:unfurls][url] = attachment
             end
 
-            req = Net::HTTP::Post.new(SLACK_UNFURL_API.path)
+            req = Net::HTTP::Post.new(Config::SLACK_UNFURL_API.path)
             req.body = unfurls.to_json
             req['Content-Type'] = 'application/json'
             req['Authorization'] = "Bearer #{SLACK_TOKEN}"
 
-            https = Net::HTTP.new(SLACK_UNFURL_API.host, SLACK_UNFURL_API.port)
+            https = Net::HTTP.new(Config::SLACK_UNFURL_API.host, Config::SLACK_UNFURL_API.port)
             https.use_ssl = true
             res = https.request(req)
         else
@@ -70,4 +63,6 @@ class SyakusiApp < Sinatra::Base
 
         return {}.to_json
     end
+
+    run! if app_file == $0
 end
