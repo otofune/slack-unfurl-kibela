@@ -52,7 +52,7 @@ class SyakusiApp < Sinatra::Base
             req = Net::HTTP::Post.new(Config::SLACK_UNFURL_API.path)
             req.body = unfurls.to_json
             req['Content-Type'] = 'application/json'
-            req['Authorization'] = "Bearer #{SLACK_TOKEN}"
+            req['Authorization'] = "Bearer #{Config::SLACK_TOKEN}"
 
             https = Net::HTTP.new(Config::SLACK_UNFURL_API.host, Config::SLACK_UNFURL_API.port)
             https.use_ssl = true
