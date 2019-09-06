@@ -1,0 +1,16 @@
+{
+  "name": "Syakusi",
+  "description": "The slack app to unfurl kibela links",
+  "repository": "https://github.com/otofune/slack-unfurl-kibela",
+  "env": {
+    "KIBELA_TEAM_NAME": {
+      "description": "Kibela team name"
+    },
+    "KIBELA_ACCESS_TOKEN": {
+      "description": "Get from https://my.kibe.la/settings/access_tokens"
+    },
+    "SLACK_TOKEN": {
+      "description": "Slack app's OAuth token"
+    }
+  }
+}
