@@ -81,6 +81,7 @@ DEPENDENCIES
   guard-rack (~> 2.2)
   irb (~> 1.0)
   pry-byebug (~> 3.7)
+  rack (~> 2.0)
   sinatra (~> 2.0)
 
 BUNDLED WITH
