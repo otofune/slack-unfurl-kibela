@@ -35,8 +35,29 @@ class SyakusiApp < Sinatra::Base
                 next unless url.path.start_with?("/notes/") || url.path.start_with?("/@")
 
                 note = KibelaClient.get_note(url.path)
+
+                if url.fragment&.start_with?('comment_')
+                    match = /^comment_(?<id>\d+)/i.match url.fragment
+                    if not match.nil?
+                        id = match.named_captures['id']
+                        comment = KibelaClient.get_comment(id)
+                        attachment = {
+                            author_link: comment.author.url,
+                            author_name: "@#{comment.author.account}",
+                            title: "「#{note.title}」へのコメント",
+                            title_link: link['url'],
+                            # Kibela サイトでの挙動 (ブラウザーがホワイトスペースを詰める) にあわせる
+                            text: comment.summary.gsub(/\s+/, ' '),
+                            footer: 'Kibela',
+                            footer_icon: 'https://cdn.kibe.la/assets/shortcut_icon-99b5d6891a0a53624ab74ef26a28079e37c4f953af6ea62396f060d3916df061.png',
+                            ts: Time.parse(note.published_at).to_i
+                        }
+                        unfurls[:unfurls][url] = attachment
+                        next
+                    end
+                end
+
                 attachment = {
-                    author_icon: note.author.avatar_image.url,
                     author_link: note.author.url,
                     author_name: "@#{note.author.account}",
                     title: note.title,

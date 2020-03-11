@@ -3,6 +3,7 @@
 require 'graphql/client'
 require 'graphql/client/http'
 require 'json'
+require 'base64'
 require_relative 'config'
 
 class KibelaClient
@@ -35,7 +36,29 @@ class KibelaClient
     }
     GRAPHQL
 
+    CommentQuery = Client.parse <<-'GRAPHQL'
+    query($id: ID!) {
+        comment: comment(id: $id) {
+            author {
+                id
+                account
+                avatarImage {
+                    url
+                }
+                url
+            }
+            id
+            publishedAt
+            summary: contentSummaryHtml
+        }
+    }
+    GRAPHQL
+
     def self.get_note path
         Client.query(NoteQuery, variables: { path: path })&.data&.note
+    end
+
+    def self.get_comment id
+        Client.query(CommentQuery, variables: { id: Base64.strict_encode64("Comment/#{id}") })&.data&.comment
     end
 end
