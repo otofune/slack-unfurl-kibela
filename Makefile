@@ -8,4 +8,5 @@ clean:
 build-bundler:
 	docker build -t $(bundler_docker_image_tag) $(bundler_dockerfile)
 pack-lambda: build-bundler
-	docker run -it --rm -v $(PWD):/app -v /app/vendor $(bundler_docker_image_tag) sh -c 'cd /app && bundle install --path vendor/bundle --without development && zip -r lambda.zip .'
+	docker run -it --rm -v $(PWD):/app -v /app/vendor -v /app/.git $(bundler_docker_image_tag) \
+		sh -c 'cd /app && bundle install --path vendor/bundle --without development && zip -r lambda.zip .'

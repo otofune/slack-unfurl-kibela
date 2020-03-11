@@ -41,7 +41,8 @@ class SyakusiApp < Sinatra::Base
                     author_name: "@#{note.author.account}",
                     title: note.title,
                     title_link: note.url,
-                    text: note.summary,
+                    # Kibela サイトでの挙動 (ブラウザーがホワイトスペースを詰める) にあわせる
+                    text: note.summary.gsub(/\s+/, ' '),
                     footer: 'Kibela',
                     footer_icon: 'https://cdn.kibe.la/assets/shortcut_icon-99b5d6891a0a53624ab74ef26a28079e37c4f953af6ea62396f060d3916df061.png',
                     ts: Time.parse(note.published_at).to_i
