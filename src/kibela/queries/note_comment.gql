@@ -1,0 +1,15 @@
+query($id: ID!) {
+    comment: comment(id: $id) {
+        author {
+            id
+            account
+            avatarImage {
+                url
+            }
+            url
+        }
+        id
+        publishedAt
+        summary: contentSummaryHtml
+    }
+}

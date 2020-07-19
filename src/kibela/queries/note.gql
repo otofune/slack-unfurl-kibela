@@ -1,0 +1,17 @@
+query ($path: String!) {
+    note: noteFromPath(path: $path) {
+        author {
+            id
+            account
+            avatarImage {
+                url
+            }
+            url
+        }
+        id
+        title
+        url
+        publishedAt
+        summary: contentSummaryHtml
+    }
+}
