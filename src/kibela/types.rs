@@ -1,56 +1,58 @@
 use serde::{Deserialize, Serialize};
 
-type ID = String;
+pub type ID = String;
 
 #[derive(Debug, Serialize, Deserialize)]
-struct UserAvatarImage {
-    url: String,
+pub struct UserAvatarImage {
+    pub url: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct User {
-    account: String,
-    id: ID,
+pub struct User {
+    pub account: String,
+    pub id: ID,
     #[serde(rename = "avatarImage")]
-    avatar_image: UserAvatarImage,
-    url: String,
+    pub avatar_image: UserAvatarImage,
+    pub url: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Note {
-    id: ID,
-    title: String,
-    url: String,
+pub struct Note {
+    pub id: ID,
+    pub title: String,
+    pub url: String,
     #[serde(rename = "publishedAt")]
-    published_at: String,
-    summary: String,
-    author: User,
+    pub published_at: String,
+    pub summary: String,
+    pub author: User,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Comment {
-    id: ID,
+pub struct Comment {
+    pub id: ID,
     #[serde(rename = "publishedAt")]
-    published_at: String,
-    summary: String,
-    author: User,
+    pub published_at: String,
+    pub summary: String,
+    pub author: User,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct CommentQueryRoot {
-    comment: Comment,
+pub struct CommentQueryRoot {
+    pub comment: Comment,
 }
 #[derive(Debug, Serialize, Deserialize)]
-struct NoteQueryRoot {
-    note: Note,
+pub struct NoteQueryRoot {
+    pub note: Note,
 }
 
-// TODO: このへんジェネリクスでなんとかならないか?
 #[derive(Debug, Serialize, Deserialize)]
-pub struct CommentQuerySuccessfulResponse {
-    data: CommentQueryRoot,
+pub struct GraphQLError {
+    pub message: String,
 }
+
 #[derive(Debug, Serialize, Deserialize)]
-pub struct NoteQuerySuccessfulResponse {
-    data: NoteQueryRoot,
+#[serde(untagged)]
+pub enum QueryResponse<T> {
+    Err { errors: Vec<GraphQLError> },
+    Ok { data: T },
 }
