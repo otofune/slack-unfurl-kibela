@@ -22,22 +22,15 @@ pub struct Client {
 // TODO: めっちゃ適当
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync + 'static>>;
 
-// note: QueryResponse<$ty> を雑にジェネリクスで定義しようとするとトレイト境界エラーが出る
-// serde::Deserialize の型をどう絞るかに苦心した (というかライフタイムがわかってない) 結果マクロにしてしまった
-macro_rules! parse_query {
-    ( $ty: ty, $val: expr ) => {
-        {
-            let res: GraphQLQueryResponse<$ty> = serde_json::from_str(&$val)?;
-            let res: Result<$ty> = match res {
-                GraphQLQueryResponse::Ok { data } => Ok(data),
-                GraphQLQueryResponse::Err { errors } => {
-                    let errors: Vec<String> = errors.into_iter().map(|m| m.message).collect();
-                    // into をやめたい (適当すぎる Result<T> を使うのやめて固有のエラーにしたい)
-                    Err(format!("GraphQL server returns error: {}", errors.as_slice().join(", ")).into())
-                },
-            };
-            res
-        }
+fn parse_query<'a, T>(val: &'a str) -> Result<T> where T: serde::Deserialize<'a> {
+    let res: GraphQLQueryResponse<T> = serde_json::from_str(&val)?;
+    match res {
+        GraphQLQueryResponse::Ok { data } => Ok(data),
+        GraphQLQueryResponse::Err { errors } => {
+            let errors: Vec<String> = errors.into_iter().map(|m| m.message).collect();
+            // into をやめたい (適当すぎる Result<T> を使うのやめて固有のエラーにしたい)
+            Err(format!("GraphQL server returns error: {}", errors.as_slice().join(", ")).into())
+        },
     }
 }
 
@@ -66,7 +59,7 @@ impl Client {
                 }),
             )
             .await?;
-        let res = parse_query!(NoteQueryRoot, &res)?;
+        let res = parse_query::<NoteQueryRoot>(&res)?;
         Ok(res.note)
     }
     pub async fn comment(&self, comment_id: &str) -> Result<Comment> {
@@ -80,7 +73,7 @@ impl Client {
                 }),
             )
             .await?;
-        let res = parse_query!(CommentQueryRoot, &res)?;
+        let res = parse_query::<CommentQueryRoot>(&res)?;
         Ok(res.comment)
     }
 }
