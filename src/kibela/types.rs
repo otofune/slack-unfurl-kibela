@@ -52,7 +52,13 @@ pub struct GraphQLError {
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(untagged)]
-pub enum QueryResponse<T> {
+pub enum GraphQLQueryResponse<T> {
     Err { errors: Vec<GraphQLError> },
     Ok { data: T },
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+pub struct GraphQLQueryRequest {
+    pub query: String,
+    pub variables: serde_json::Value,
 }

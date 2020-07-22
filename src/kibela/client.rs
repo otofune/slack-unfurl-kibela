@@ -6,13 +6,12 @@ use surf::mime;
 #[folder = "./src/kibela/queries"]
 struct Queries;
 
-use super::types::{Comment, Note, NoteQueryRoot, CommentQueryRoot, QueryResponse};
+use super::types::{
+    Comment, CommentQueryRoot, GraphQLQueryRequest, GraphQLQueryResponse, Note, NoteQueryRoot,
+};
 
 pub fn new(team: String, token: String) -> Client {
-    Client {
-        team,
-        token,
-    }
+    Client { team, token }
 }
 
 pub struct Client {
@@ -28,10 +27,10 @@ type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync 
 macro_rules! parse_query {
     ( $ty: ty, $val: expr ) => {
         {
-            let res: QueryResponse<$ty> = serde_json::from_str(&$val)?;
+            let res: GraphQLQueryResponse<$ty> = serde_json::from_str(&$val)?;
             let res: Result<$ty> = match res {
-                QueryResponse::Ok { data } => Ok(data),
-                QueryResponse::Err { errors } => {
+                GraphQLQueryResponse::Ok { data } => Ok(data),
+                GraphQLQueryResponse::Err { errors } => {
                     let errors: Vec<String> = errors.into_iter().map(|m| m.message).collect();
                     // into をやめたい (適当すぎる Result<T> を使うのやめて固有のエラーにしたい)
                     Err(format!("GraphQL server returns error: {}", errors.as_slice().join(", ")).into())
@@ -43,10 +42,14 @@ macro_rules! parse_query {
 }
 
 impl Client {
-    async fn exec_query(&self, body: String) -> Result<String> {
+    async fn exec_query(&self, query: &str, variables: serde_json::Value) -> Result<String> {
+        let req = GraphQLQueryRequest {
+            query: query.to_string(),
+            variables,
+        };
         surf::post(format!("https://{}.kibe.la/api/v1", self.team))
             .set_header("authorization", format!("Bearer {}", self.token))
-            .body_string(body)
+            .body_string(serde_json::to_string(&req)?)
             .set_mime(mime::APPLICATION_JSON)
             .recv_string()
             .await
@@ -55,26 +58,28 @@ impl Client {
     pub async fn note(&self, path: &str) -> Result<Note> {
         let query = Queries::get("note.gql").ok_or("can not get query file")?;
         let query: &str = std::str::from_utf8(query.as_ref())?;
-        let req = json!({
-            "query": query,
-            "variables": {
-                "path": path,
-            }
-        });
-        let res = self.exec_query(serde_json::to_string(&req)?).await?;
+        let res = self
+            .exec_query(
+                query,
+                json!({
+                    "path": path,
+                }),
+            )
+            .await?;
         let res = parse_query!(NoteQueryRoot, &res)?;
         Ok(res.note)
     }
     pub async fn comment(&self, comment_id: &str) -> Result<Comment> {
         let query = Queries::get("note_comment.gql").ok_or("can not get query file")?;
         let query: &str = std::str::from_utf8(query.as_ref())?;
-        let req = json!({
-            "query": query,
-            "variables": {
-                "id": base64::encode(format!("Comment/{}", comment_id)),
-            }
-        });
-        let res = self.exec_query(serde_json::to_string(&req)?).await?;
+        let res = self
+            .exec_query(
+                query,
+                json!({
+                    "id": base64::encode(format!("Comment/{}", comment_id)),
+                }),
+            )
+            .await?;
         let res = parse_query!(CommentQueryRoot, &res)?;
         Ok(res.comment)
     }
