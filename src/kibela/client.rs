@@ -59,7 +59,7 @@ impl Client {
                 }),
             )
             .await?;
-        let res = parse_query::<NoteQueryRoot>(&res)?;
+        let res: NoteQueryRoot = parse_query(&res)?;
         Ok(res.note)
     }
     pub async fn comment(&self, comment_id: &str) -> Result<Comment> {
@@ -73,7 +73,7 @@ impl Client {
                 }),
             )
             .await?;
-        let res = parse_query::<CommentQueryRoot>(&res)?;
+        let res: CommentQueryRoot = parse_query(&res)?;
         Ok(res.comment)
     }
 }
