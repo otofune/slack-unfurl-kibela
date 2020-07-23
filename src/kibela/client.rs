@@ -6,32 +6,16 @@ use surf::mime;
 #[folder = "./src/kibela/queries"]
 struct Queries;
 
-use super::types::{
-    Comment, CommentQueryRoot, GraphQLQueryRequest, GraphQLQueryResponse, Note, NoteQueryRoot,
-};
-
-pub fn new(team: String, token: String) -> Client {
-    Client { team, token }
-}
+use super::graphql::parse_query;
+use super::types::{Comment, CommentQueryRoot, GraphQLQueryRequest, Note, NoteQueryRoot, Result};
 
 pub struct Client {
     token: String,
     team: String,
 }
 
-// TODO: めっちゃ適当
-type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync + 'static>>;
-
-fn parse_query<'a, T>(val: &'a str) -> Result<T> where T: serde::Deserialize<'a> {
-    let res: GraphQLQueryResponse<T> = serde_json::from_str(&val)?;
-    match res {
-        GraphQLQueryResponse::Ok { data } => Ok(data),
-        GraphQLQueryResponse::Err { errors } => {
-            let errors: Vec<String> = errors.into_iter().map(|m| m.message).collect();
-            // into をやめたい (適当すぎる Result<T> を使うのやめて固有のエラーにしたい)
-            Err(format!("GraphQL server returns error: {}", errors.as_slice().join(", ")).into())
-        },
-    }
+pub fn new(team: String, token: String) -> Client {
+    Client { team, token }
 }
 
 impl Client {
