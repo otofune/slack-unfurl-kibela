@@ -6,9 +6,13 @@ use surf::mime;
 #[folder = "./src/kibela/queries"]
 struct Queries;
 
-use super::graphql::parse_query;
-use super::types::{Comment, CommentQueryRoot, GraphQLQueryRequest, Note, NoteQueryRoot, Result};
+use super::{
+    types::{Comment, CommentQueryRoot, Note, NoteQueryRoot},
+    graphql::{GraphQLQueryRequest, parse_query}
+};
+use crate::types::Result;
 
+#[derive(Clone)]
 pub struct Client {
     token: String,
     team: String,

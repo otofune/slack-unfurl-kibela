@@ -1,4 +1,23 @@
-use super::types::{GraphQLQueryResponse, Result};
+use crate::types::Result;
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Deserialize)]
+pub struct GraphQLError {
+    pub message: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(untagged)]
+pub enum GraphQLQueryResponse<T> {
+    Err { errors: Vec<GraphQLError> },
+    Ok { data: T },
+}
+
+#[derive(Debug, Serialize)]
+pub struct GraphQLQueryRequest {
+    pub query: String,
+    pub variables: serde_json::Value,
+}
 
 pub fn parse_query<'a, T>(val: &'a str) -> Result<T>
 where
@@ -21,7 +40,7 @@ where
 
 #[cfg(test)]
 mod parse_query_tests {
-    use super::super::types::GraphQLQueryResponse;
+    use super::GraphQLQueryResponse;
 
     #[test]
     fn it_must_return_joined_description_when_error() {
