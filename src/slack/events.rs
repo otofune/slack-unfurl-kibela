@@ -11,7 +11,11 @@ pub struct Link {
 #[serde(tag = "type")]
 #[serde(rename_all = "snake_case")]
 pub enum EventCallback {
-    LinkShared { channel: String, links: Vec<Link> },
+    LinkShared {
+        channel: String,
+        links: Vec<Link>,
+        message_ts: String,
+    },
 }
 
 #[derive(Debug, Deserialize)]

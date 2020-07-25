@@ -1,4 +1,5 @@
 use serde::Serialize;
+use std::collections::HashMap;
 
 #[derive(Debug, Serialize)]
 #[serde(untagged)]
@@ -21,5 +22,6 @@ pub enum UnfurlBody {
 pub struct Unfurl {
     pub channel: String,
     pub ts: String,
-    pub unfurls: Vec<UnfurlBody>,
+    // key = url
+    pub unfurls: HashMap<String, UnfurlBody>,
 }

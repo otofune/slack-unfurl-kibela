@@ -1,14 +1,13 @@
 use rust_embed::RustEmbed;
 use serde_json::json;
-use surf::mime;
 
 #[derive(RustEmbed)]
 #[folder = "./src/kibela/queries"]
 struct Queries;
 
 use super::{
+    graphql::{parse_query, GraphQLQueryRequest},
     types::{Comment, CommentQueryRoot, Note, NoteQueryRoot},
-    graphql::{GraphQLQueryRequest, parse_query}
 };
 use crate::types::Result;
 
@@ -30,8 +29,7 @@ impl Client {
         };
         surf::post(format!("https://{}.kibe.la/api/v1", self.team))
             .set_header("authorization", format!("Bearer {}", self.token))
-            .body_string(serde_json::to_string(&req)?)
-            .set_mime(mime::APPLICATION_JSON)
+            .body_json(&req)?
             .recv_string()
             .await
     }

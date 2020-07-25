@@ -1,9 +1,12 @@
-use regex::Regex;
 use lazy_static::lazy_static;
+use regex::Regex;
 
 #[derive(Debug, PartialEq)]
 pub enum UrlType<'a> {
-    Note { path: &'a str, comment_id: Option<&'a str> }
+    Note {
+        path: &'a str,
+        comment_id: Option<&'a str>,
+    },
 }
 
 pub fn parse_url(url: &url::Url) -> Option<UrlType> {
@@ -25,7 +28,6 @@ pub fn parse_url(url: &url::Url) -> Option<UrlType> {
 
     Some(UrlType::Note { path, comment_id })
 }
-
 
 #[cfg(test)]
 mod tests {
