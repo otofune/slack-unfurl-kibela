@@ -14,12 +14,16 @@ use crate::types::Result;
 
 impl Client {
     pub async fn unfurl(&self, unfurl: Unfurl) -> Result<()> {
-        let res = surf::post("https://slack.com/api/chat.unfurl")
+        let mut res = surf::post("https://slack.com/api/chat.unfurl")
             .body_json(&unfurl)?
             .set_header("Authorization", &self.authorization)
             .await?;
+        let body = res
+            .body_string()
+            .await
+            .unwrap_or("<can not retrive body>".into());
         if !res.status().is_success() {
-            return Err(format!("Slack returns {} error: ", res.status()).into());
+            return Err(format!("Slack returns {} error: {}", res.status().as_str(), body,).into());
         }
         Ok(())
     }
