@@ -27,6 +27,10 @@ pub struct Note {
     pub summary: String,
     pub author: User,
 }
+#[derive(Debug, Deserialize)]
+pub struct NoteQueryRoot {
+    pub note: Note,
+}
 
 #[derive(Debug, Deserialize)]
 pub struct Comment {
@@ -36,12 +40,13 @@ pub struct Comment {
     pub summary: String,
     pub author: User,
 }
-
 #[derive(Debug, Deserialize)]
-pub struct CommentQueryRoot {
-    pub comment: Comment,
+pub struct CommentToNote {
+    pub id: ID,
+    pub title: String,
 }
 #[derive(Debug, Deserialize)]
-pub struct NoteQueryRoot {
-    pub note: Note,
+pub struct CommentAndNote {
+    pub comment: Comment,
+    pub to_note: CommentToNote,
 }

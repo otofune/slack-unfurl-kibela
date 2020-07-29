@@ -7,7 +7,7 @@ struct Queries;
 
 use super::{
     graphql::{parse_query, GraphQLQueryRequest},
-    types::{Comment, CommentQueryRoot, Note, NoteQueryRoot},
+    types::{CommentAndNote, Note, NoteQueryRoot},
 };
 use crate::types::Result;
 
@@ -48,18 +48,18 @@ impl Client {
         let res: NoteQueryRoot = parse_query(&res)?;
         Ok(res.note)
     }
-    pub async fn comment(&self, comment_id: &str) -> Result<Comment> {
-        let query = Queries::get("note_comment.gql").ok_or("can not get query file")?;
+    pub async fn comment_and_note(&self, comment_id: &str, path: &str) -> Result<CommentAndNote> {
+        let query = Queries::get("comment_and_note.gql").ok_or("can not get query file")?;
         let query: &str = std::str::from_utf8(query.as_ref())?;
         let res = self
             .exec_query(
                 query,
                 json!({
-                    "id": base64::encode(format!("Comment/{}", comment_id)),
+                    "comment_id": base64::encode(format!("Comment/{}", comment_id)),
+                    "path": path,
                 }),
             )
             .await?;
-        let res: CommentQueryRoot = parse_query(&res)?;
-        Ok(res.comment)
+        parse_query::<CommentAndNote>(&res)
     }
 }

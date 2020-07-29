@@ -1,5 +1,5 @@
-query($id: ID!) {
-    comment: comment(id: $id) {
+query($comment_id: ID!, $path: String!) {
+    comment: comment(id: $comment_id) {
         author {
             id
             account
@@ -11,5 +11,9 @@ query($id: ID!) {
         id
         publishedAt
         summary: contentSummaryHtml
+    }
+    to_note: noteFromPath(path: $path) {
+        id
+        title
     }
 }

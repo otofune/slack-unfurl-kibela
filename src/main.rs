@@ -2,6 +2,7 @@ mod kibela;
 mod slack;
 mod types;
 
+use kibela::types::CommentAndNote;
 use kibela::url::{parse_url, UrlType as KibelaUrlType};
 use slack::{
     events::{Event, EventCallback, Link},
@@ -41,14 +42,13 @@ async fn process_links(
                 path,
                 comment_id: Some(comment_id),
             }) => {
-                let note = client.note(path).await;
-                let comment = client.comment(comment_id).await;
-                match (note, comment) {
-                    (Ok(note), Ok(comment)) => {
+                let result = client.comment_and_note(comment_id, path).await;
+                match result {
+                    Ok(CommentAndNote { comment, to_note }) => {
                         bodies.insert(link.url.to_string(), UnfurlBody::Attachment {
                             author_link: comment.author.url.to_string(),
                             author_name: format!("@{}", comment.author.account),
-                            title: format!("「{}」へのコメント", note.title),
+                            title: format!("「{}」へのコメント", to_note.title),
                             title_link: link.url.to_string(),
                             // ブラウザーがホワイトスペースを詰める Kibe.la サイトでの挙動にあわせる
                             text: collapse_whitespace(comment.summary.as_str()),
@@ -58,20 +58,16 @@ async fn process_links(
                         });
                         Ok(())
                     }
-                    // FIXME: 地獄なのでなんとかできないか
-                    (Err(e1), Err(e2)) => {
-                        Err(format!("retruns error {}, {}", e1.to_string(), e2.to_string()).into())
-                    }
-                    (Err(e), _) => Err(e),
-                    (_, Err(e)) => Err(e),
+                    // if let でやりたいが block で return できないので match
+                    Err(e) => Err(e),
                 }
             }
             Some(KibelaUrlType::Note {
                 path,
                 comment_id: None,
             }) => {
-                let note = client.note(path).await;
-                match note {
+                let result = client.note(path).await;
+                match result {
                     Ok(note) => {
                         bodies.insert(link.url.to_string(), UnfurlBody::Attachment {
                             author_link: note.author.url.to_string(),
@@ -154,6 +150,7 @@ async fn main() -> std::result::Result<(), std::io::Error> {
                 }
             }
         });
+    app.at("/").get(|_| async { Ok("Hello world") });
     app.listen("0.0.0.0:8080").await?;
     Ok(())
 }
